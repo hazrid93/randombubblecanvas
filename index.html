@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-bootstrap/0.5pre/assets/css/bootstrap.min.css">
+    </head>
+    <body>
+       <!--  -->
+
+		<body>
+			   <style>
+		
+					body {
+					  background: url("https://i.imgur.com/I2LYmuo_d.jpg?maxwidth=1920");
+					  padding: 0;
+					  margin: 0;
+					}
+
+					#canvasX {
+					 
+					  position: absolute;
+					  background-color: rgba(0,0,0,0.3);
+					 /* height: 100%;
+					  width: 100%;
+					  TIP: don't set size for canvas in css, it merely stretching it.
+					  */
+
+
+					}
+			</style>
+			
+			<canvas id="canvasX">test</canvas>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+			<script>
+								$(document).ready(function(){
+					  //get the canvas dom element at index 0
+					  //to use normal javascript method/attributes
+					  var canvas = $("#canvasX")[0];
+					  var setWidth = $("body").width();
+
+					  var setHeight = $(document).height() - $("body").offset().top
+					 
+					  canvas.width = setWidth;
+					  canvas.height = setHeight;
+					//  canvas.style.width = setWidth;
+					//  canvas.style.height = setHeight;
+
+					  var gradientX = setWidth*0.4;
+
+					  var canvasControl = canvas.getContext("2d");
+					  canvasControl.imageSmoothingEnabled = true;
+					  //scale width and height to 200% 	
+					  // context.scale(scalewidth,scaleheight);
+					  canvasControl.scale(2,2);
+					  
+					  var my_gradient = canvasControl.createLinearGradient(0,0,gradientX,60);
+						  my_gradient.addColorStop(0,"white");
+						  my_gradient.addColorStop(0.3,"red");
+						  my_gradient.addColorStop(0.6,"yellow");
+						  my_gradient.addColorStop(0.8,"grey");
+						  my_gradient.addColorStop(1,"black");
+						  canvasControl.fillStyle = my_gradient;
+					  //get the canvas width and height since i set to 100%
+					  var canvasWidth = $("#canvasX").innerWidth();
+					  var canvasHeight = $("#canvasX").innerHeight();
+
+					  var maxRadius = 5;
+					  var minRadius = 3;
+					  
+					 
+					  //number of bubble
+					  var bubbleCount = 200;
+					  
+					  function getRandomRadius(){
+						//ensure the random radius is between 3 and 10
+							var cRadius = Math.floor(Math.random() * (maxRadius-minRadius)) + minRadius;
+							return cRadius;
+					  }
+					  
+					  function randomXindex(){
+							//get x-coordinate
+							var xRand = Math.floor(Math.random() * (canvasWidth+800))  - 800;
+							return xRand;
+					  }
+					  
+					  function randomYindex(){
+						//get Y-coordinate
+						var yRand = Math.floor(Math.random() * (canvasHeight-10)) + 10;
+						return yRand;
+					  }
+					  
+					  //globals
+					  var xInit;
+					  var yInit;
+					  var rInit;
+					  var array69x = [];
+					  var array69y = [];
+					  var array69r = [];
+					  var array69Bool = [];
+					  var arraycheckIndex;
+					  //add bubble object
+					 // var bubbleObj = {};
+					  
+					  
+					  
+					 function generate(){
+					   for(var i=0;i<bubbleCount;i++){
+						  xInit = Math.floor(randomXindex()*-0.2);
+						  // xInit = xInit*0.5;
+						  yInit = Math.floor(randomYindex()*1);
+						 // yInit = yInit*0.5;
+						  rInit = getRandomRadius();
+						 
+						  array69x.push(xInit);
+						  array69y.push(yInit);
+						  array69r.push(rInit);
+						 //false means bubble is not out of width  yet...
+						  array69Bool.push("false");
+						 }
+					   
+					   }
+					  
+						//draw in canvas
+						function drawBubble(){  
+						 canvasControl.clearRect(0,0,canvas.width,canvas.height);
+						 
+						for(var i=0;i<bubbleCount;i++){
+						  
+						  
+						  canvasControl.beginPath();
+
+						  //draw full circle
+						  canvasControl.arc(array69x[i],array69y[i],array69r[i],0,2*Math.PI);
+						  canvasControl.closePath();
+						  canvasControl.fill();
+						  //stroke gives the black outline (style is not set for this)
+						  canvasControl.stroke();
+						  }
+					  }
+					  
+					  function checkArray(xVal){
+					 //   console.log("ORIGINAL = " + array69x[arraycheckIndex]);
+					 //   console.log("COMPARE OTHER VALUE = " + xVal);
+						var tempindex = array69x[arraycheckIndex];
+						if ( xVal<tempindex){
+							return true;
+						} else {
+							return false;
+						}
+						
+					  }
+					  
+					  function mover(){
+
+						for(var i=0;i<bubbleCount;i++){
+							   arraycheckIndex=i;
+					 
+							   array69x[i]=array69x[i]+0.5;
+							   array69y[i]=array69y[i]-0.2;
+						  
+							  if(array69x[i]<=(Math.floor(canvas.width*0.5))){
+								array69Bool[i]="false";
+							  } else {
+					 
+								for(var i=0;i<bubbleCount;i++){
+								  var boolReturned = array69x.every(checkArray);
+								
+								  if(boolReturned==true){
+									
+									array69Bool[i]="false";
+								  } else {
+									array69Bool[i]="true";
+								  }
+							  
+								}
+							  }
+							}
+						}
+					  
+					  generate();
+					  
+					  //60fps (1000/60)
+					  setInterval(function(){ 
+						drawBubble();
+						mover();
+						for(var i=0;i<bubbleCount;i++){
+						
+							if(array69Bool[i]=="true"){
+							  
+							  array69x = [];
+							  array69y = [];
+							  array69r = [];
+							  array69Bool = [];
+							  generate();
+							  
+							}
+						 }
+					  }, 1000/60);
+					  
+					  
+					/*
+
+						  if(array69x[i]>=(Math.floor(canvas.width*0.5))){
+							 array69x = [];
+							 array69y = [];
+							 array69r = [];
+							generate();
+							}
+							*/
+					  //request frame
+					  //call recursively
+					  //alternative is setInterval
+					  //frame ID are not taken here as there are no need to stop animation in this Pen
+					  /*
+					  function animate(){
+						
+						window.requestAnimationFrame(animate);
+					  }
+					  
+					  window.requestAnimationFrame(animate);
+					  */
+					  
+					  // hazrid93@hotmail.com
+					  // Author: Hazrid Azad
+					});
+			</script>
+		</body>
+		
+    </body>
+</html>
